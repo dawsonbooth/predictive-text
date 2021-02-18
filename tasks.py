@@ -22,7 +22,7 @@ def clean_build(c):
     version = _run(c, "poetry version -s").stdout.rstrip()
 
     with contextlib.suppress(FileNotFoundError):
-        os.remove(ROOT / f"PROJECT_NAME-{version}-{sys.platform}.spec")
+        os.remove(ROOT / f"predictive-text-{version}-{sys.platform}.spec")
     shutil.rmtree(ROOT / "build", ignore_errors=True)
     shutil.rmtree(ROOT / "dist", ignore_errors=True)
 
@@ -69,7 +69,7 @@ def lint(c):
 def build(c):
     """Build project distributable"""
     version = _run(c, "poetry version -s").stdout.rstrip()
-    filename = f"PROJECT_NAME-{version}-{sys.platform}"
+    filename = f"predictive-text-{version}-{sys.platform}"
 
     _run(c, f"python -O -m PyInstaller --clean --onefile --name {filename} -y src/main.py")
 
@@ -88,7 +88,7 @@ def release(c):
     """Create GitHub release"""
     version = _run(c, "poetry version -s").stdout.rstrip()
 
-    _run(c, f'gh release create v{version} -t "PROJECT_NAME v{version}"')
+    _run(c, f'gh release create v{version} -t "predictive-text v{version}"')
 
 
 @task

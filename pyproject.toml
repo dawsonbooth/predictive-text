@@ -1,12 +1,12 @@
 [tool.poetry]
-name = "PROJECT_NAME"
+name = "predictive-text"
 version = "0.3.4"
 description = ""
 authors = ["Dawson Booth <github@dawsonbooth.com>"]
 license = "MIT"
 readme = "README.md"
-homepage = "https://github.com/dawsonbooth/PROJECT_NAME"
-repository = "https://github.com/dawsonbooth/PROJECT_NAME"
+homepage = "https://github.com/dawsonbooth/predictive-text"
+repository = "https://github.com/dawsonbooth/predictive-text"
 keywords = []
 classifiers = [
     "Environment :: Console",
@@ -20,6 +20,7 @@ include = [
 
 [tool.poetry.dependencies]
 python = "^3.8"
+pandas = "^1.2.2"
 
 [tool.poetry.dev-dependencies]
 black = "^20.8b1"
