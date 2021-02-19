@@ -6,7 +6,7 @@ from typing import List, Sequence
 
 class Model(ABC):
     @abstractmethod
-    def fit(self, tokens: Sequence[str]) -> None:
+    def fit(self, text: Sequence[str]) -> None:
         ...
 
     @abstractmethod
