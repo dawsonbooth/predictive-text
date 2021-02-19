@@ -8,7 +8,6 @@ def ngrams(tokens: Sequence[str], n: int) -> Generator[Tuple[str, ...], None, No
 
 
 def tokenize(text: str) -> List[str]:
-    text = re.sub(r"\d", "", text)
     text = re.sub(r"[^\w\s]", " ", text)
 
     return text.split()
