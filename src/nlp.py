@@ -7,7 +7,8 @@ def ngrams(tokens: Sequence[str], n: int) -> Generator[Tuple[str, ...], None, No
         yield tuple(tokens[i : i + n])
 
 
-def tokenize(text: str) -> List[str]:
-    text = re.sub(r"[^\w\s]", " ", text)
+token_re = re.compile(r"[A-Za-z]+[\w^\']*|[\w^\']*[A-Za-z]+[\w^\']*")
 
-    return text.split()
+
+def tokenize(text: str) -> List[str]:
+    return token_re.findall(text)
