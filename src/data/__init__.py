@@ -1,5 +1,6 @@
 from pathlib import Path
 
-import pandas as pd
+from nlp import tokenize
 
-tweets = pd.read_csv(Path(__file__).parent / "Donald-Tweets!.csv")["Tweet_Text"]
+text = (Path(__file__).parent / "homer-illiad.txt").read_text()
+tokens = tokenize(text)
