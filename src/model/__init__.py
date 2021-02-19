@@ -1,4 +1,4 @@
-from .bigram import LaplaceBigrams, NaiveBigrams
 from .model import Model
+from .ngrams import NGrams
 
-__all__ = ["LaplaceBigrams", "NaiveBigrams", "Model"]
+__all__ = ["Model", "NGrams"]
