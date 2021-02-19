@@ -1,8 +1,8 @@
 import itertools
 
 from data import text
-from model import Model, NGrams
-from model.ngrams import Smoothing
+from model import MLE, Model
+from model.mle import Smoothing
 
 
 def free_write(model: Model, prompt: str, max_length: int = 80) -> None:
@@ -15,12 +15,13 @@ def free_write(model: Model, prompt: str, max_length: int = 80) -> None:
 
 n_sizes = [2, 3, 4]
 smoothings = [Smoothing.NONE, Smoothing.LAPLACE, Smoothing.GOOD_TURING]
-prompts = ["Go, and I will tell you", "On Sunday, the other gods"]
+histories = [10]
+prompts = ["Go, and I will tell you", "On Sunday, the other gods", "O"]
 
 
 if __name__ == "__main__":
-    for n, smoothing, prompt in itertools.product(n_sizes, smoothings, prompts):
-        print((n, smoothing.name, prompt))
-        m = NGrams(n, smoothing)
+    for n, smoothing, history, prompt in itertools.product(n_sizes, smoothings, histories, prompts):
+        print((n, smoothing.name, history, prompt))
+        m = MLE(n, smoothing, history)
         m.fit(text)
         free_write(m, prompt)

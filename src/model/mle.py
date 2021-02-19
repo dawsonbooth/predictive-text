@@ -1,6 +1,6 @@
 import enum
 import math
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from nlp import ngrams, tokenize
 
@@ -13,19 +13,21 @@ class Smoothing(enum.Enum):
     GOOD_TURING = enum.auto()
 
 
-class NGrams(Model):
+class MLE(Model):
     n: int
-    smoothing: Optional[Smoothing]
+    smoothing: Smoothing
+    history: int
     tokens: List[str]
     unigram_counts: Dict[str, int]
     ngram_counts: Dict[Tuple[str, ...], int]
 
-    def __init__(self, n: int = 2, smoothing: Optional[Smoothing] = None) -> None:
+    def __init__(self, n: int = 2, smoothing: Optional[Smoothing] = None, history: int = -1) -> None:
         super().__init__()
         self.n = n
-        self.smoothing = smoothing
+        self.smoothing = smoothing or Smoothing.NONE
+        self.history = max(history, self.n)
 
-    def fit(self, text: Sequence[str]) -> None:
+    def fit(self, text: str) -> None:
         self.tokens = tokenize(text)
 
         self.unigram_counts = dict()
@@ -40,9 +42,11 @@ class NGrams(Model):
         vocab_size = len(self.unigram_counts)
         prompt_tokens = tokenize(prompt)
 
-        def prob_follows_prompt(token: str) -> float:
+        def mle(token: str) -> float:
             p_log = math.log(1.0)
-            for ngram in ngrams([*prompt_tokens, token], self.n):
+            tokens = [*prompt_tokens, token][-self.history :]
+            tokens = [""] * max(0, self.n - len(tokens)) + tokens
+            for ngram in ngrams(tokens, self.n):
                 unigram_count = self.unigram_counts.get(ngram[0], 0)
                 ngram_count = self.ngram_counts.get(ngram, 0)
 
@@ -60,7 +64,7 @@ class NGrams(Model):
 
             return math.exp(p_log)
 
-        return sorted(self.unigram_counts.keys(), key=prob_follows_prompt, reverse=True)
+        return sorted(self.unigram_counts.keys(), key=mle, reverse=True)
 
 
-__all__ = ["NGrams"]
+__all__ = ["MLE"]
