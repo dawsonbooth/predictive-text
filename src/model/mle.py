@@ -25,7 +25,7 @@ class MLE(Model):
     unigram_counts: Dict[str, int]
     ngram_counts: Dict[Tuple[str, ...], int]
 
-    def __init__(self, n: int = 3, smoothing: Optional[Smoothing] = None, history: int = -1) -> None:
+    def __init__(self, n: int = 3, smoothing: Smoothing = Smoothing.LAPLACE, history: int = -1) -> None:
         super().__init__()
         self.n = n
         self.smoothing = smoothing or Smoothing.NONE

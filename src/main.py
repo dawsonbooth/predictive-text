@@ -3,7 +3,6 @@ import random
 from data import text
 from model import KNN, MLE, Model
 from model.knn import Distance
-from model.mle import Smoothing
 
 
 def free_write(model: Model, prompt: str, max_length: int = 80, temperature: int = 2) -> None:
@@ -20,7 +19,7 @@ prompt = "The hitch-hiker's guide to the"
 
 if __name__ == "__main__":
     print(f"MLE: {prompt}")
-    m: Model = MLE(3, smoothing=Smoothing.LAPLACE, history=10)
+    m: Model = MLE(3, history=10)
     m.fit(text)
     print(list(m.predict(prompt).items())[:5])
     free_write(m, prompt)
