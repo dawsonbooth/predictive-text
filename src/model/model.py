@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import List
+from typing import Dict
 
 
 class Model(ABC):
@@ -10,5 +10,5 @@ class Model(ABC):
         ...
 
     @abstractmethod
-    def predict(self, text: str) -> List[str]:
+    def predict(self, text: str) -> Dict[str, float]:
         ...

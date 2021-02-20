@@ -1,3 +1,4 @@
+import collections
 import enum
 import math
 from typing import Dict, List, Optional, Tuple
@@ -24,7 +25,7 @@ class MLE(Model):
     unigram_counts: Dict[str, int]
     ngram_counts: Dict[Tuple[str, ...], int]
 
-    def __init__(self, n: int = 2, smoothing: Optional[Smoothing] = None, history: int = -1) -> None:
+    def __init__(self, n: int = 3, smoothing: Optional[Smoothing] = None, history: int = -1) -> None:
         super().__init__()
         self.n = n
         self.smoothing = smoothing or Smoothing.NONE
@@ -41,7 +42,7 @@ class MLE(Model):
         for ngram in ngrams(self.tokens, self.n):
             self.ngram_counts[ngram] = self.ngram_counts.get(ngram, 0) + 1
 
-    def predict(self, prompt: str) -> List[str]:
+    def predict(self, prompt: str) -> Dict[str, float]:
         vocab_size = len(self.unigram_counts)
         prompt_tokens = tokenize(prompt)[(-self.history - 1) :]
         prompt_tokens = [""] * max(0, self.n - 1 - len(prompt_tokens)) + prompt_tokens
@@ -65,9 +66,11 @@ class MLE(Model):
                         return 0
                     p_log = p_log + math.log(ngram_count / unigram_count)
 
-            return math.exp(p_log)
+            return p_log
 
-        return sorted(self.unigram_counts.keys(), key=mle, reverse=True)
+        return collections.OrderedDict(
+            (sorted(self.unigram_counts.items(), key=lambda item: mle(item[0]), reverse=True))
+        )
 
 
 __all__ = ["MLE"]
