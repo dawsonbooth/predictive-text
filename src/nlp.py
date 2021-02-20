@@ -12,3 +12,10 @@ token_re = re.compile(r"[A-Za-z]+[\w^\']*|[\w^\']*[A-Za-z]+[\w^\']*")
 
 def tokenize(text: str) -> List[str]:
     return token_re.findall(text)
+
+
+lemma_re = re.compile(r"\w+")
+
+
+def lemmatize(token: str) -> str:
+    return sorted(lemma_re.findall(token), key=len, reverse=True)[0]

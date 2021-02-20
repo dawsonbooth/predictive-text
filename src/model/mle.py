@@ -14,9 +14,12 @@ class Smoothing(enum.Enum):
 
 
 class MLE(Model):
+    __slots__ = "n", "smoothing", "history", "tokens", "unigram_counts", "ngram_counts"
+
     n: int
     smoothing: Smoothing
     history: int
+
     tokens: List[str]
     unigram_counts: Dict[str, int]
     ngram_counts: Dict[Tuple[str, ...], int]
@@ -40,12 +43,12 @@ class MLE(Model):
 
     def predict(self, prompt: str) -> List[str]:
         vocab_size = len(self.unigram_counts)
-        prompt_tokens = tokenize(prompt)
+        prompt_tokens = tokenize(prompt)[(-self.history - 1) :]
+        prompt_tokens = [""] * max(0, self.n - 1 - len(prompt_tokens)) + prompt_tokens
 
         def mle(token: str) -> float:
             p_log = math.log(1.0)
-            tokens = [*prompt_tokens, token][-self.history :]
-            tokens = [""] * max(0, self.n - len(tokens)) + tokens
+            tokens = [*prompt_tokens, token]
             for ngram in ngrams(tokens, self.n):
                 unigram_count = self.unigram_counts.get(ngram[0], 0)
                 ngram_count = self.ngram_counts.get(ngram, 0)
