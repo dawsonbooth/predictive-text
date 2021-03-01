@@ -25,7 +25,7 @@ if __name__ == "__main__":
     free_write(m, prompt)
 
     print(f"KNN: {prompt}")
-    m = KNN(3, Distance.NONE)
+    m = KNN(1, Distance.POS)
     m.fit(text)
     print(list(m.predict(prompt).items())[:5])
     free_write(m, prompt)

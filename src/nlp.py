@@ -1,6 +1,8 @@
 import re
 from typing import Generator, List, Sequence, Tuple
 
+import nltk
+
 
 def ngrams(tokens: Sequence[str], n: int) -> Generator[Tuple[str, ...], None, None]:
     for i in range(len(tokens) - n + 1):
@@ -31,3 +33,7 @@ def edit_distance(a: str, b: str) -> int:
         return edit_distance(a[1:], b[1:])
     else:
         return 1 + min(edit_distance(a[1:], b), edit_distance(a, b[1:]), edit_distance(a[1:], b[1:]))
+
+
+def pos_tags(tokens: Sequence[str]) -> List[Tuple[str, str]]:
+    return nltk.pos_tag(tokens)

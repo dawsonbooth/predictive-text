@@ -6,7 +6,7 @@ from typing import Dict, Optional, Tuple
 import wn
 import wn.similarity
 
-from nlp import edit_distance, lemmatize, ngrams, tokenize
+from nlp import edit_distance, lemmatize, ngrams, pos_tags, tokenize
 
 from .model import Model
 
@@ -18,23 +18,31 @@ class Distance(enum.Enum):
     PATH = enum.auto()
     WU_PALMER = enum.auto()
     LEACOCK_CHORDOROW = enum.auto()
+    POS = enum.auto()
 
 
 def ngram_distance(ngram: Tuple[str, ...], other: Tuple[str, ...], metric: Distance = Distance.NONE):
-    metric = metric or Distance.NONE
-    n = len(ngram)
     distance = 0.0
-    for i in range(n):
-        lemma1, lemma2 = lemmatize(ngram[i]), lemmatize(other[i])
+    ngram_lemmas = tuple(lemmatize(t) for t in ngram)
+    other_lemmas = tuple(lemmatize(t) for t in other)
+
+    if metric is Distance.POS:
+        ngram_pos = tuple(tag[1] for tag in pos_tags(ngram_lemmas))
+        other_pos = tuple(tag[1] for tag in pos_tags(other_lemmas))
+        for i in range(len(ngram)):
+            distance += int(ngram_pos[i] != other_pos[i])
+        return distance
+
+    for i in range(len(ngram)):
         if metric is Distance.NONE:
-            distance += int(lemma1 != lemma2)
+            distance += int(ngram_lemmas[i] != other_lemmas[i])
         elif metric is Distance.LENGTH:
-            distance += abs(len(lemma1) - len(lemma2))
+            distance += abs(len(ngram_lemmas[i]) - len(other_lemmas[i]))
         elif metric is Distance.LEVENSHTEIN:
-            distance += edit_distance(lemma1, lemma2)
+            distance += edit_distance(ngram_lemmas[i], other_lemmas[i])
         else:
             try:
-                synset1, synset2 = wn.synsets(lemma1)[0], wn.synsets(lemma2)[0]
+                synset1, synset2 = wn.synsets(ngram_lemmas[i])[0], wn.synsets(other_lemmas[i])[0]
             except IndexError:
                 continue
             if metric is Distance.PATH:
