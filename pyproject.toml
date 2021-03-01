@@ -21,6 +21,7 @@ include = [
 [tool.poetry.dependencies]
 python = "^3.8"
 wn = "^0.5.1"
+nltk = "^3.5"
 
 [tool.poetry.dev-dependencies]
 black = "^20.8b1"
