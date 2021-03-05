@@ -26,9 +26,9 @@ def ngram_distance(ngram: Tuple[str, ...], other: Tuple[str, ...], metric: Dista
     ngram_lemmas = tuple(lemmatize(t) for t in ngram)
     other_lemmas = tuple(lemmatize(t) for t in other)
 
-    if metric is Distance.POS:
-        ngram_pos = tuple(tag[1] for tag in pos_tags(ngram_lemmas))
-        other_pos = tuple(tag[1] for tag in pos_tags(other_lemmas))
+    if metric is Distance.POS:  # TODO: Distance between POS
+        ngram_pos = tuple(tag[1] for tag in pos_tags(ngram))
+        other_pos = tuple(tag[1] for tag in pos_tags(other))
         for i in range(len(ngram)):
             distance += int(ngram_pos[i] != other_pos[i])
         return distance
@@ -44,6 +44,7 @@ def ngram_distance(ngram: Tuple[str, ...], other: Tuple[str, ...], metric: Dista
             try:
                 synset1, synset2 = wn.synsets(ngram_lemmas[i])[0], wn.synsets(other_lemmas[i])[0]
             except IndexError:
+                distance += 1
                 continue
             if metric is Distance.PATH:
                 distance += 1 - wn.similarity.path(synset1, synset2)
