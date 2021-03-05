@@ -12,8 +12,8 @@ from invoke.runners import Result
 ROOT = Path(__file__).parent
 
 
-def _run(c: Context, command: str) -> Result:
-    return c.run(command, pty=platform.system() != "Windows")
+def _run(c: Context, command: str, *args: str) -> Result:
+    return c.run(f"{command} {' '.join(args)}", pty=platform.system() != "Windows")
 
 
 @task
@@ -30,7 +30,7 @@ def clean_build(c):
 @task
 def clean_python(c):
     """Clean up python file artifacts"""
-    _run(c, f"pyclean {ROOT}")
+    _run(c, f"pyclean {ROOT / 'src'}")
 
 
 @task
@@ -47,22 +47,32 @@ def clean(c):
 @task(name="format", help={"check": "Checks if source is formatted without applying changes"})
 def format_(c, check=False):
     """Format code"""
-    isort_options = ["--check-only", "--diff"] if check else []
-    _run(c, f"isort {ROOT / 'src'} {' '.join(isort_options)}")
-    black_options = ["--diff", "--check"] if check else ["--quiet"]
-    _run(c, f"black {ROOT / 'src'} {' '.join(black_options)}")
+    autoflake_args = ["-r", "--remove-all-unused-imports"]
+    isort_args = []
+    black_args = ["--quiet"]
+
+    if check:
+        isort_args += ["--check-only", "--diff"]
+        black_args += ["--diff", "--check"]
+    else:
+        autoflake_args += ["-i"]
+
+    _run(c, f"autoflake {ROOT}", *autoflake_args)
+    _run(c, f"isort {ROOT}", *isort_args)
+    _run(c, f"black {ROOT}", *black_args)
 
 
 @task
 def type_check(c):
     """Run type-checking"""
-    _run(c, f"mypy {ROOT / 'src'} --ignore-missing-imports")
+    _run(c, f"mypy {ROOT} --ignore-missing-imports")
 
 
 @task(pre=[call(format_, check=True), type_check])
 def lint(c):
     """Run all linting"""
-    _run(c, f"flake8 {ROOT / 'src'} --max-line-length 119 --extend-ignore E203,W503")
+    flake8_args = ["--max-line-length 119", "--extend-ignore E203,W503", "--exclude .venv"]
+    _run(c, f"flake8 {ROOT}", *flake8_args)
 
 
 @task(pre=[clean_build])
