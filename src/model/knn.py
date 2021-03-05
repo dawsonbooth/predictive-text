@@ -91,4 +91,4 @@ class KNN(Model):
         return collections.OrderedDict((sorted(follower_odds.items(), key=lambda item: item[1], reverse=True)))
 
 
-__all__ = ["KNN"]
+__all__ = ["KNN", "Distance", "ngram_distance"]

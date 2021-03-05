@@ -12,3 +12,6 @@ class Model(ABC):
     @abstractmethod
     def predict(self, text: str) -> Dict[str, float]:
         ...
+
+
+__all__ = ["Model"]

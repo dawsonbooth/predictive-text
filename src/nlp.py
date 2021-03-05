@@ -40,3 +40,6 @@ def pos_tags(tokens: Sequence[str]) -> List[Tuple[str, str]]:
 
 def simplify_tag(tag: str) -> str:
     return nltk.tag.map_tag("en-ptb", "universal", tag)
+
+
+__all__ = ["ngrams", "tokenize", "lemmatize", "edit_distance", "pos_tags", "simplify_tag"]
