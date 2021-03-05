@@ -1,7 +1,7 @@
 import random
 
 from data import text
-from model import KNN, MLE, Model
+from model import KNN, Model, Naive
 from model.knn import Distance
 
 
@@ -15,17 +15,17 @@ def free_write(model: Model, prompt: str, max_length: int = 80, temperature: int
     print()
 
 
-prompt = "The hitch-hiker's guide to the"
+prompt = "The hitch-hiker's guide"
 
 if __name__ == "__main__":
-    print(f"MLE: {prompt}")
-    m: Model = MLE(3, history=10)
+    print(f"Naive: {prompt}")
+    m: Model = Naive(3, history=10)
     m.fit(text)
     print(list(m.predict(prompt).items())[:5])
     free_write(m, prompt)
 
     print(f"KNN: {prompt}")
-    m = KNN(1, Distance.POS)
+    m = KNN(3, Distance.WU_PALMER)
     m.fit(text)
     print(list(m.predict(prompt).items())[:5])
     free_write(m, prompt)

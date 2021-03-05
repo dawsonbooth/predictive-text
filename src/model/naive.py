@@ -14,7 +14,7 @@ class Smoothing(enum.Enum):
     GOOD_TURING = enum.auto()
 
 
-class MLE(Model):
+class Naive(Model):
     __slots__ = "n", "smoothing", "history", "tokens", "unigram_counts", "ngram_counts"
 
     n: int

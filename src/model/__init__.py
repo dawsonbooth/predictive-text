@@ -1,5 +1,5 @@
 from .knn import KNN
-from .mle import MLE
 from .model import Model
+from .naive import Naive
 
-__all__ = ["Model", "MLE", "KNN"]
+__all__ = ["Model", "Naive", "KNN"]
