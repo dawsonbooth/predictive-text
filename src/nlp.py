@@ -2,6 +2,8 @@ import re
 from typing import Generator, List, Sequence, Tuple
 
 import nltk
+import nltk.tag
+import nltk.tokenize
 
 
 def ngrams(tokens: Sequence[str], n: int) -> Generator[Tuple[str, ...], None, None]:
@@ -9,18 +11,15 @@ def ngrams(tokens: Sequence[str], n: int) -> Generator[Tuple[str, ...], None, No
         yield tuple(tokens[i : i + n])
 
 
-token_re = re.compile(r"[A-Za-z]+[\w^\']*|[\w^\']*[A-Za-z]+[\w^\']*|[^\w\s]+")
-
-
 def tokenize(text: str) -> List[str]:
-    return token_re.findall(text)
+    return nltk.word_tokenize(text)
 
 
-lemma_re = re.compile(r"\w+")
+LEMMA_RE = re.compile(r"\w+")
 
 
 def lemmatize(token: str) -> str:
-    slices = lemma_re.findall(token)
+    slices = LEMMA_RE.findall(token)
     return sorted(slices, key=len, reverse=True)[0].lower() if slices else token
 
 
@@ -36,4 +35,8 @@ def edit_distance(a: str, b: str) -> int:
 
 
 def pos_tags(tokens: Sequence[str]) -> List[Tuple[str, str]]:
-    return nltk.pos_tag(tokens)
+    return nltk.tag.pos_tag(tokens)
+
+
+def simplify_tag(tag: str) -> str:
+    return nltk.tag.map_tag("en-ptb", "universal", tag)
