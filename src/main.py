@@ -15,17 +15,17 @@ def free_write(model: Model, prompt: str, max_length: int = 80, temperature: int
     print()
 
 
-prompt = "The hitch-hiker's guide"
+prompt = "The hitch hiker's guide"
 
 if __name__ == "__main__":
     print(f"Naive: {prompt}")
-    m: Model = Naive(3, history=10)
+    m: Model = Naive(2, history=5)
     m.fit(text)
     print(list(m.predict(prompt).items())[:5])
     free_write(m, prompt)
 
     print(f"KNN: {prompt}")
-    m = KNN(3, Distance.WU_PALMER)
+    m = KNN(3, {Distance.NAIVE, Distance.POS})
     m.fit(text)
     print(list(m.predict(prompt).items())[:5])
     free_write(m, prompt)

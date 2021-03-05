@@ -1,18 +1,18 @@
 import collections
 import enum
 from collections import defaultdict
-from typing import Dict, Optional, Tuple
+from typing import Collection, Dict, Optional, Tuple
 
 import wn
 import wn.similarity
 
-from nlp import edit_distance, lemmatize, ngrams, pos_tags, tokenize
+from nlp import edit_distance, lemmatize, ngrams, pos_tags, simplify_tag, tokenize
 
 from .model import Model
 
 
 class Distance(enum.Enum):
-    NONE = enum.auto()
+    NAIVE = enum.auto()
     LENGTH = enum.auto()
     LEVENSHTEIN = enum.auto()
     PATH = enum.auto()
@@ -21,24 +21,25 @@ class Distance(enum.Enum):
     POS = enum.auto()
 
 
-def ngram_distance(ngram: Tuple[str, ...], other: Tuple[str, ...], metric: Distance = Distance.NONE):
+def ngram_distance(ngram: Tuple[str, ...], other: Tuple[str, ...], metrics: Collection[Distance] = {Distance.NAIVE}):
     distance = 0.0
     ngram_lemmas = tuple(lemmatize(t) for t in ngram)
     other_lemmas = tuple(lemmatize(t) for t in other)
 
-    if metric is Distance.POS:  # TODO: Distance between POS
+    if Distance.POS in metrics:
         ngram_pos = tuple(tag[1] for tag in pos_tags(ngram))
         other_pos = tuple(tag[1] for tag in pos_tags(other))
         for i in range(len(ngram)):
-            distance += int(ngram_pos[i] != other_pos[i])
+            distance += int(ngram_pos[i] != other_pos[i]) * 0.25
+            distance += int(simplify_tag(ngram_pos[i]) != simplify_tag(other_pos[i]))
         return distance
 
     for i in range(len(ngram)):
-        if metric is Distance.NONE:
+        if Distance.NAIVE in metrics:
             distance += int(ngram_lemmas[i] != other_lemmas[i])
-        elif metric is Distance.LENGTH:
+        elif Distance.LENGTH in metrics:
             distance += abs(len(ngram_lemmas[i]) - len(other_lemmas[i]))
-        elif metric is Distance.LEVENSHTEIN:
+        elif Distance.LEVENSHTEIN in metrics:
             distance += edit_distance(ngram_lemmas[i], other_lemmas[i])
         else:
             try:
@@ -46,11 +47,11 @@ def ngram_distance(ngram: Tuple[str, ...], other: Tuple[str, ...], metric: Dista
             except IndexError:
                 distance += 1
                 continue
-            if metric is Distance.PATH:
+            if Distance.PATH in metrics:
                 distance += 1 - wn.similarity.path(synset1, synset2)
-            elif metric is Distance.WU_PALMER:
+            elif Distance.WU_PALMER in metrics:
                 distance += 1 - wn.similarity.wup(synset1, synset2)
-            elif metric is Distance.LEACOCK_CHORDOROW:
+            elif Distance.LEACOCK_CHORDOROW in metrics:
                 distance += 1 - wn.similarity.lch(synset1, synset2)
     return distance
 
@@ -66,7 +67,7 @@ class KNN(Model):
     def __init__(self, n: int = 3, metric: Optional[Distance] = None) -> None:
         super().__init__()
         self.n = n
-        self.metric = metric or Distance.NONE
+        self.metric = metric or Distance.NAIVE
 
     def fit(self, text: str) -> None:
         tokens = tokenize(text)
