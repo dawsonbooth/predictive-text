@@ -1,7 +1,7 @@
 import collections
 import enum
 import math
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 
 from nlp import ngrams, tokenize
 
@@ -71,6 +71,3 @@ class Naive(Model):
         return collections.OrderedDict(
             (sorted(self.unigram_counts.items(), key=lambda item: mle(item[0]), reverse=True))
         )
-
-
-__all__ = ["MLE"]
