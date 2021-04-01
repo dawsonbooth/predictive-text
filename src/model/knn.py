@@ -1,7 +1,7 @@
 import collections
 import enum
 from collections import defaultdict
-from typing import Collection, Dict, Optional, Tuple
+from typing import Collection, Dict, Tuple
 
 import wn
 import wn.similarity
@@ -60,14 +60,14 @@ class KNN(Model):
     __slots__ = "n", "similarity", "unigrams", "ngram_follower_counts"
 
     n: int
-    metric: Distance
+    metrics: Collection[Distance]
 
     ngram_follower_counts: Dict[Tuple[str, ...], Dict[str, int]]
 
-    def __init__(self, n: int = 3, metric: Optional[Distance] = None) -> None:
+    def __init__(self, n: int = 3, metrics: Collection[Distance] = {Distance.NAIVE}) -> None:
         super().__init__()
         self.n = n
-        self.metric = metric or Distance.NAIVE
+        self.metrics = metrics
 
     def fit(self, text: str) -> None:
         tokens = tokenize(text)
@@ -84,7 +84,7 @@ class KNN(Model):
         follower_odds: Dict[str, int] = defaultdict(int)
 
         for neighbor in self.ngram_follower_counts.keys():
-            neighbor_distance = ngram_distance(prompt_ngram, neighbor, self.metric)
+            neighbor_distance = ngram_distance(prompt_ngram, neighbor, self.metrics)
             for follower, follower_count in self.ngram_follower_counts[neighbor].items():
                 follower_odds[follower] += (1 - (1 / follower_count)) * (self.n - neighbor_distance)
 
