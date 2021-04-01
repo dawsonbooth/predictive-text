@@ -15,7 +15,7 @@ def free_write(model: Model, prompt: str, max_length: int = 80, temperature: int
     print()
 
 
-prompt = "The hitch hiker's guide"
+prompt = "The hitch hiker's guide to the"
 
 if __name__ == "__main__":
     print(f"Naive: {prompt}")
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     free_write(m, prompt)
 
     print(f"KNN: {prompt}")
-    m = KNN(3, {Distance.NAIVE, Distance.POS})
+    m = KNN(4, {Distance.NAIVE})
     m.fit(text)
     print(list(m.predict(prompt).items())[:5])
     free_write(m, prompt)
