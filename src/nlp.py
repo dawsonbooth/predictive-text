@@ -1,7 +1,6 @@
 import re
 from typing import Generator, List, Sequence, Tuple
 
-import nltk
 import nltk.tag
 import nltk.tokenize
 
@@ -12,7 +11,7 @@ def ngrams(tokens: Sequence[str], n: int) -> Generator[Tuple[str, ...], None, No
 
 
 def tokenize(text: str) -> List[str]:
-    return nltk.word_tokenize(text)
+    return nltk.tokenize.word_tokenize(text)
 
 
 LEMMA_RE = re.compile(r"\w+")
