@@ -10,8 +10,11 @@ def ngrams(tokens: Sequence[str], n: int) -> Generator[Tuple[str, ...], None, No
         yield tuple(tokens[i : i + n])
 
 
+TOKENS_RE = re.compile(r"[A-Z]{2,}(?![a-z])|[A-Z][a-z]+(?=[A-Z])|[\'\w\-]+")
+
+
 def tokenize(text: str) -> List[str]:
-    return nltk.tokenize.word_tokenize(text)
+    return TOKENS_RE.findall(text)
 
 
 LEMMA_RE = re.compile(r"\w+")
