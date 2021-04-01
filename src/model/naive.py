@@ -66,11 +66,11 @@ class Naive(Model):
                         return 0
                     p_log = p_log + math.log(ngram_count / unigram_count)
 
-            return p_log
+            return 2 ** p_log
 
-        return collections.OrderedDict(
-            (sorted(self.unigram_counts.items(), key=lambda item: mle(item[0]), reverse=True))
-        )
+        follower_odds = {k: mle(k) for k in self.unigram_counts.keys()}
+
+        return collections.OrderedDict((sorted(follower_odds.items(), key=lambda item: item[1], reverse=True)))
 
 
 __all__ = ["Naive", "Smoothing"]
