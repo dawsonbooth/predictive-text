@@ -1,6 +1,7 @@
 import collections
 import enum
 from collections import defaultdict
+from functools import lru_cache
 from typing import Collection, Dict, Tuple
 
 import wn
@@ -21,39 +22,40 @@ class Distance(enum.Enum):
     POS = enum.auto()
 
 
-def ngram_distance(ngram: Tuple[str, ...], other: Tuple[str, ...], metrics: Collection[Distance] = {Distance.NAIVE}):
+@lru_cache(maxsize=None)
+def token_distance(token: str, other: str, metrics: Collection[Distance] = {Distance.NAIVE}) -> float:
     distance = 0.0
-    ngram_lemmas = tuple(lemmatize(t) for t in ngram)
-    other_lemmas = tuple(lemmatize(t) for t in other)
+    token_lemma = lemmatize(token)
+    other_lemma = lemmatize(other)
 
     if Distance.POS in metrics:
-        ngram_pos = tuple(tag[1] for tag in pos_tags(ngram))
-        other_pos = tuple(tag[1] for tag in pos_tags(other))
-        for i in range(len(ngram)):
-            distance += int(ngram_pos[i] != other_pos[i]) * 0.25
-            distance += int(simplify_tag(ngram_pos[i]) != simplify_tag(other_pos[i]))
-        return distance
+        token_pos = pos_tags([token])[0][1]
+        other_pos = pos_tags([other])[0][1]
+        distance += int(simplify_tag(token_pos) != simplify_tag(other_pos))
+    if Distance.NAIVE in metrics:
+        distance += int(token_lemma != other_lemma)
+    if Distance.LENGTH in metrics:
+        distance += abs(len(token_lemma) - len(other_lemma))
+    if Distance.LEVENSHTEIN in metrics:
+        distance += edit_distance(token_lemma, other_lemma)
+    if any(d in metrics for d in {Distance.PATH, Distance.WU_PALMER, Distance.LEACOCK_CHORDOROW}):
+        try:
+            synset1, synset2 = wn.synsets(token_lemma)[0], wn.synsets(other_lemma)[0]
+        except IndexError:
+            distance += len([d in metrics for d in {Distance.PATH, Distance.WU_PALMER, Distance.LEACOCK_CHORDOROW}])
+            return distance / len(metrics)
+        if Distance.PATH in metrics:
+            distance += 1 - wn.similarity.path(synset1, synset2)
+        if Distance.WU_PALMER in metrics:
+            distance += 1 - wn.similarity.wup(synset1, synset2)
+        if Distance.LEACOCK_CHORDOROW in metrics:
+            distance += 1 - wn.similarity.lch(synset1, synset2)
 
-    for i in range(len(ngram)):
-        if Distance.NAIVE in metrics:
-            distance += int(ngram_lemmas[i] != other_lemmas[i])
-        elif Distance.LENGTH in metrics:
-            distance += abs(len(ngram_lemmas[i]) - len(other_lemmas[i]))
-        elif Distance.LEVENSHTEIN in metrics:
-            distance += edit_distance(ngram_lemmas[i], other_lemmas[i])
-        else:
-            try:
-                synset1, synset2 = wn.synsets(ngram_lemmas[i])[0], wn.synsets(other_lemmas[i])[0]
-            except IndexError:
-                distance += 1
-                continue
-            if Distance.PATH in metrics:
-                distance += 1 - wn.similarity.path(synset1, synset2)
-            elif Distance.WU_PALMER in metrics:
-                distance += 1 - wn.similarity.wup(synset1, synset2)
-            elif Distance.LEACOCK_CHORDOROW in metrics:
-                distance += 1 - wn.similarity.lch(synset1, synset2)
-    return distance
+    return distance / len(metrics)
+
+
+def ngram_distance(ngram: Tuple[str, ...], other: Tuple[str, ...], metrics: Collection[Distance] = {Distance.NAIVE}):
+    return sum(token_distance(ngram[i], other[i], tuple(set(metrics))) for i in range(len(ngram))) / len(ngram)
 
 
 class KNN(Model):
@@ -86,7 +88,7 @@ class KNN(Model):
         for neighbor in self.ngram_follower_counts.keys():
             neighbor_distance = ngram_distance(prompt_ngram, neighbor, self.metrics)
             for follower, follower_count in self.ngram_follower_counts[neighbor].items():
-                follower_odds[follower] += (1 - (1 / follower_count)) * (self.n - neighbor_distance)
+                follower_odds[follower] += follower_count * (self.n - neighbor_distance)
 
         return collections.OrderedDict((sorted(follower_odds.items(), key=lambda item: item[1], reverse=True)))
 
