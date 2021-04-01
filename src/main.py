@@ -15,17 +15,27 @@ def free_write(model: Model, prompt: str, max_length: int = 80, temperature: int
     print()
 
 
+def list_predictions(model: Model, prompt: str, num_predictions: int = 5) -> None:
+    token_odds = model.predict(prompt)
+    for i, item in enumerate(list(token_odds.items())):
+        print(f"\t{i + 1}. '{item[0]}' ({item[1]})")
+        if i + 1 == num_predictions:
+            return
+
+
 prompt = "The hitch hiker's guide to the"
 
 if __name__ == "__main__":
-    print(f"Naive: {prompt}")
+    print(f"Prompt: {prompt}")
+
+    print("NAIVE")
     m: Model = Naive(2, history=5)
     m.fit(text)
-    print(list(m.predict(prompt).items())[:5])
+    list_predictions(m, prompt)
     free_write(m, prompt)
 
-    print(f"KNN: {prompt}")
-    m = KNN(4, {Distance.NAIVE})
+    print("KNN")
+    m = KNN(2, {Distance.NAIVE, Distance.WU_PALMER})
     m.fit(text)
-    print(list(m.predict(prompt).items())[:5])
+    list_predictions(m, prompt)
     free_write(m, prompt)
