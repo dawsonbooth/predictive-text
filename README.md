@@ -1,9 +1,8 @@
 # `predictive-text`
 
-
 ## Description
 
-This is a short or long textual description of the project.
+This script provides a comparison of different predictive-text algorithms.
 
 ## Installation
 
@@ -18,12 +17,7 @@ git clone https://github.com/dawsonbooth/predictive-text
 The following is an example usage of the project:
 
 ```bash
-python src/main.py > out.txt
-```
-The `out.txt` file then contains:
-
-```txt
-Hello world!
+python src/main.py
 ```
 
 ## License
